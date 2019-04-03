@@ -67,7 +67,7 @@ fn main() {
                     .unwrap_or_else(|_| panic!("Failed to launch {}", VIDEO_PLAYER.name));
             }
         },
-        Err(e) => println!("{}", e),
+        Err(e) => eprintln!("{}", e),
     };
 }
 
