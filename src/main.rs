@@ -11,7 +11,7 @@ struct DynamicMenu<'a> { name: &'a str, args: &'a [&'a str] }
 struct VideoPlayer<'a> { name: &'a str, args: &'a [&'a str] }
 
 /* /path/to/dir */
-static DIR: &str = "/home/kim/Shows";
+static DIR: &str = "/home/kim/Film";
 
 static DYNAMIC_MENU: DynamicMenu = DynamicMenu {
     /* dmenu / rofi / fzf / fzy */
@@ -71,8 +71,7 @@ fn read_dir() -> std::io::Result<Vec<Vec<u8>>> {
     let mut episodes: Vec<_> = std::fs::read_dir(DIR)?
         .flat_map(|result| {
             result.map(|entry| {
-                let entry = entry.file_name();
-                let mut entry: Vec<u8> = entry.as_bytes().to_vec();
+                let mut entry: Vec<u8> = entry.file_name().as_bytes().to_vec();
                 entry.push(10); // 10 = "\n"
                 entry
             })
