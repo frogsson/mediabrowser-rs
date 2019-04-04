@@ -5,6 +5,7 @@ Meant to be slightly faster than using a bash script.
 
 use std::process::{Command, Stdio};
 use std::io::Write;
+use std::os::unix::ffi::OsStrExt;
 
 struct DynamicMenu<'a> { name: &'a str, args: &'a [&'a str] }
 struct VideoPlayer<'a> { name: &'a str, args: &'a [&'a str] }
@@ -14,7 +15,6 @@ static DIR: &str = "/home/kim/Shows";
 
 static DYNAMIC_MENU: DynamicMenu = DynamicMenu {
     /* dmenu / rofi / fzf / fzy */
-
     name: "dmenu",
     args: &["-l", "14", "-i", "-p", "select"],
 
@@ -27,7 +27,6 @@ static DYNAMIC_MENU: DynamicMenu = DynamicMenu {
 
 static VIDEO_PLAYER: VideoPlayer = VideoPlayer {
     /* mpv / vlc */
-
     name: "mpv",
     args: &[],
 };
@@ -41,15 +40,12 @@ fn main() {
         .unwrap_or_else(|_| panic!("Failed to launch {}", DYNAMIC_MENU.name));
 
     {
-        let stdin = dmenu.stdin.as_mut().expect("Failed to open stream");
+        let episodes = read_dir().unwrap_or_else(|e| panic!("Error: {}", e));
 
-        let episodes: String = read_dir()
-            .unwrap_or_else(|e| panic!("{}", e))
-            .iter()
-            .flat_map(|s| s.chars())
-            .collect();
-
-        stdin.write_all(&episodes.as_bytes()).unwrap();
+        let stdin = dmenu.stdin.as_mut().unwrap_or_else(|| panic!("Error: failed to open stdin pipe for {}", DYNAMIC_MENU.name));
+        for episode in episodes {
+            stdin.write_all(&episode[..]).unwrap_or_else(|e| panic!("Error: {}", e));
+        }
     }
 
     let dmenu_output = dmenu
@@ -71,13 +67,15 @@ fn main() {
     };
 }
 
-fn read_dir() -> std::io::Result<Vec<String>> {
-    let mut episodes: Vec<String> = std::fs::read_dir(DIR)?
-        .flat_map(|entry| entry.map(|e| e.file_name()))
-        .map(|entry| {
-            let mut entry = entry.to_str().map(String::from).unwrap();
-            entry.push_str("\n");
-            entry
+fn read_dir() -> std::io::Result<Vec<Vec<u8>>> {
+    let mut episodes: Vec<_> = std::fs::read_dir(DIR)?
+        .flat_map(|result| {
+            result.map(|entry| {
+                let entry = entry.file_name();
+                let mut entry: Vec<u8> = entry.as_bytes().to_vec();
+                entry.push(10); // 10 = "\n"
+                entry
+            })
         }).collect();
 
     episodes.sort();
