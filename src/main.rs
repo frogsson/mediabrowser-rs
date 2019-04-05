@@ -11,7 +11,7 @@ struct DynamicMenu<'a> { name: &'a str, args: &'a [&'a str] }
 struct VideoPlayer<'a> { name: &'a str, args: &'a [&'a str] }
 
 /* /path/to/dir */
-static DIR: &str = "/home/kim/Film";
+static DIR: &str = "/home/kim/Shows";
 
 static DYNAMIC_MENU: DynamicMenu = DynamicMenu {
     /* dmenu / rofi / fzf / fzy */
@@ -43,7 +43,7 @@ fn main() {
         let episodes = read_dir().unwrap_or_else(|e| panic!("Error: {}", e));
 
         let stdin = dmenu.stdin.as_mut().unwrap_or_else(|| panic!("Error: failed to open stdin pipe for {}", DYNAMIC_MENU.name));
-        for episode in episodes {
+        for episode in &episodes {
             stdin.write_all(&episode[..]).unwrap_or_else(|e| panic!("Error: {}", e));
         }
     }
