@@ -79,7 +79,7 @@ fn main() {
 }
 
 fn read_dir() -> std::io::Result<Vec<String>> {
-    let mut episodes = Vec::new();
+    let mut episodes = Vec::with_capacity(500);
     let mut dir_stack: LinkedList<PathBuf> = LinkedList::new();
     let special_chars: Vec<_> = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~".chars().collect();
     let filter: HashSet<&'static str> = [
@@ -124,7 +124,7 @@ fn read_dir() -> std::io::Result<Vec<String>> {
                     .collect::<Vec<_>>()[0]
                     .to_lowercase();
 
-                if file_stem.contains("sample") {
+                if file_stem == "sample" {
                     continue
                 }
 
