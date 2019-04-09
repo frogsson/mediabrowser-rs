@@ -1,6 +1,5 @@
 /*
 Small program that pipes directory content into a dynamic menu and then opens your choice in a video player.
-Meant to be slightly faster than using a bash script.
 */
 
 use std::process::{Command, Stdio};
